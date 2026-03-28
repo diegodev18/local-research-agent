@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { SendIcon } from "lucide-react"
 
+import { cn } from "@/lib/utils"
 import {
   Alert,
   AlertDescription,
@@ -133,11 +134,12 @@ export function ResearchChat() {
               {messages.map((msg, i) => (
                 <div
                   key={`${i}-${msg.role}`}
-                  className={
+                  className={cn(
+                    "max-w-[85%] rounded-none border border-border px-3 py-2 text-xs",
                     msg.role === "user"
-                      ? "ml-auto max-w-[85%] rounded-none border border-border bg-muted/50 px-3 py-2 text-xs"
-                      : "mr-auto max-w-[85%] rounded-none border border-border bg-card px-3 py-2 text-xs"
-                  }
+                      ? "ml-auto bg-muted/50"
+                      : "mr-auto bg-card"
+                  )}
                 >
                   <span className="mb-1 block text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
                     {msg.role === "user" ? "Tú" : "Asistente"}

@@ -85,6 +85,7 @@ const markdownComponents: Components = {
     <pre
       className={cn(
         "my-2 overflow-x-auto border border-border bg-muted p-2 font-mono text-[0.8rem] leading-relaxed",
+        "[&_code]:p-0 [&_code]:bg-transparent [&_code]:text-inherit",
         className,
       )}
       {...props}
@@ -94,7 +95,7 @@ const markdownComponents: Components = {
     const isBlock = /language-/.test(className ?? "")
     if (isBlock) {
       return (
-        <code className={cn("block font-mono", className)} {...props}>
+        <code className={cn("block font-mono text-inherit", className)} {...props}>
           {children}
         </code>
       )
@@ -102,7 +103,7 @@ const markdownComponents: Components = {
     return (
       <code
         className={cn(
-          "rounded-none bg-muted px-1 py-0.5 font-mono text-[0.85em]",
+          "rounded-none bg-muted px-1 py-0.5 font-mono text-[0.85em] text-foreground",
           className,
         )}
         {...props}
