@@ -21,6 +21,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
+import { ChatMessageMarkdown } from "@/components/chat/ChatMessageMarkdown"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
@@ -141,7 +142,7 @@ export function ResearchChat() {
                   <span className="mb-1 block text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
                     {msg.role === "user" ? "Tú" : "Asistente"}
                   </span>
-                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                  <ChatMessageMarkdown>{msg.content}</ChatMessageMarkdown>
                 </div>
               ))}
               {loading ? (
