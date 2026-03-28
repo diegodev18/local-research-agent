@@ -193,6 +193,26 @@ export function ResearchChat() {
           </form>
         </CardFooter>
       </Card>
+      <footer className="shrink-0 py-2 text-center text-[10px] text-muted-foreground">
+        Construido por{" "}
+        <a
+          href="https://www.youtube.com/@diegodev_18"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
+        >
+          Diego Sanchez
+        </a>
+        , desarrollador en{" "}
+        <a
+          href="https://talktokai.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
+        >
+          kAI
+        </a>
+      </footer>
     </div>
   )
 }
