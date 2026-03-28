@@ -20,24 +20,29 @@ EXPOSE 3000
 ENTRYPOINT ["/entrypoint-api.sh"]
 CMD ["bun", "run", "index.ts"]
 
-# --- Web: build estático ---
+# --- Web: build estático (usa lockfile del monorepo en la raíz; apps/web/bun.lock puede estar desactualizado) ---
 FROM oven/bun:1 AS web-builder
 
 ARG VITE_API_BASE_URL=
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
-WORKDIR /web
+WORKDIR /repo
 
-COPY apps/web/package.json apps/web/bun.lock ./
+COPY package.json bun.lock ./
+COPY apps/web/package.json ./apps/web/
+COPY apps/api/package.json ./apps/api/
+
 RUN bun install --frozen-lockfile
 
-COPY apps/web/ ./
+COPY apps/web/ ./apps/web/
+
+WORKDIR /repo/apps/web
 RUN bun run build
 
 # --- Web: Nginx + SPA ---
 FROM nginx:alpine AS web
 
-COPY --from=web-builder /web/dist /usr/share/nginx/html
+COPY --from=web-builder /repo/apps/web/dist /usr/share/nginx/html
 COPY docker/nginx-web.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
