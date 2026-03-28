@@ -2,27 +2,26 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
-import './styles/App.css'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
+      <section className="flex flex-col items-center justify-center h-screen">
+        <div className="flex flex-col items-center justify-center">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
           <img src={reactLogo} className="framework" alt="React logo" />
           <img src={viteLogo} className="vite" alt="Vite logo" />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
+        <div className="flex flex-col items-center justify-center">
+          <h1 className='text-2xl font-bold'>Get started</h1>
+          <p className="text-sm text-gray-500">
             Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
           </p>
         </div>
         <button
-          className="counter"
+          className="bg-blue-500 text-white px-4 py-2 rounded-md"
           onClick={() => setCount((count) => count + 1)}
         >
           Count is {count}
