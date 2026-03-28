@@ -5,9 +5,23 @@ import {
     type TextPart,
 } from "@google/generative-ai";
 
+import { log } from "../../lib/logger";
 import { getGeminiFunctionDeclarations } from "../tools/declarations";
 import { runReadOnlyTool } from "../tools/runner";
 import type { AgentLoopParams, AgentLoopResult } from "./types";
+
+function sanitizeToolArgs(args: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(args)) {
+        if (typeof value === "string") {
+            out[key] =
+                value.length > 120 ? `${value.slice(0, 117)}...` : value;
+        } else {
+            out[key] = value;
+        }
+    }
+    return out;
+}
 
 function isTextPart(p: Part): p is TextPart {
     return "text" in p && typeof (p as TextPart).text === "string";
@@ -31,6 +45,7 @@ export async function runAgentLoop(
     params: AgentLoopParams,
 ): Promise<AgentLoopResult> {
     const {
+        runId,
         genAI,
         modelName,
         userMessage,
@@ -56,11 +71,13 @@ export async function runAgentLoop(
     let step = 0;
     while (step < maxSteps) {
         step += 1;
+        log.info("agent.llm.round", { runId, round: step });
         let result;
         try {
             result = await model.generateContent({ contents });
         } catch (e) {
             const msg = e instanceof Error ? e.message : String(e);
+            log.warn("agent.llm.error", { runId, round: step, error: msg });
             transcriptPush({ type: "error", message: msg });
             return { ok: false, error: msg };
         }
@@ -85,6 +102,12 @@ export async function runAgentLoop(
 
         const calls = resp.functionCalls();
         if (calls?.length) {
+            log.info("agent.llm.tool_calls", {
+                runId,
+                round: step,
+                count: calls.length,
+                tools: calls.map((c) => c.name),
+            });
             const frParts: Part[] = [];
             for (const call of calls) {
                 const name = call.name;
@@ -94,9 +117,19 @@ export async function runAgentLoop(
                     !Array.isArray(call.args)
                         ? (call.args as Record<string, unknown>)
                         : {};
+                log.info("agent.tool.execute", {
+                    runId,
+                    tool: name,
+                    args: sanitizeToolArgs(args),
+                });
                 transcriptPush({ type: "tool_call", name, args });
                 const out = await runReadOnlyTool(name, args, toolContext);
                 const ok = (out as { ok?: boolean }).ok !== false;
+                log.info("agent.tool.result", {
+                    runId,
+                    tool: name,
+                    ok,
+                });
                 transcriptPush({
                     type: "tool_result",
                     name,

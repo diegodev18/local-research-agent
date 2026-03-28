@@ -12,6 +12,7 @@ import {
     MAIN_AGENT_MODEL,
 } from "../config";
 import llm from "../lib/llm";
+import { log } from "../lib/logger";
 import { runAgentLoop } from "./loop/agent-loop";
 import { RESEARCH_AGENT_SYSTEM_PROMPT } from "./prompts/system";
 import { createTranscript } from "./session/transcript";
@@ -49,8 +50,21 @@ export async function runResearchAgent(params: {
     if (!isLlmConfigured() || !llm) {
         const msg = "GOOGLE_API_KEY is not configured";
         push({ type: "error", message: msg });
+        log.warn("agent.run.skipped", {
+            runId,
+            reason: "no_llm",
+            messageChars: params.message.trim().length,
+        });
         return { reply: null, error: msg, run: record };
     }
+
+    log.info("agent.run.start", {
+        runId,
+        workspaceRoot: AGENT_WORKSPACE_ROOT,
+        model: MAIN_AGENT_MODEL ?? "default",
+        messageChars: params.message.trim().length,
+        historyTurns: params.history?.length ?? 0,
+    });
 
     const historyContents: Content[] = (params.history ?? []).map((h) => ({
         role: h.role === "model" ? "model" : "user",
@@ -66,6 +80,7 @@ export async function runResearchAgent(params: {
     };
 
     const loopResult = await runAgentLoop({
+        runId,
         genAI: llm,
         modelName: MAIN_AGENT_MODEL ?? "gemini-2.0-flash",
         userMessage: params.message.trim(),
@@ -77,7 +92,19 @@ export async function runResearchAgent(params: {
     });
 
     if (loopResult.ok) {
+        log.info("agent.run.done", {
+            runId,
+            ok: true,
+            replyChars: loopResult.reply.length,
+            stepCount: record.steps.length,
+        });
         return { reply: loopResult.reply, error: null, run: record };
     }
+    log.warn("agent.run.done", {
+        runId,
+        ok: false,
+        error: loopResult.error,
+        stepCount: record.steps.length,
+    });
     return { reply: null, error: loopResult.error, run: record };
 }

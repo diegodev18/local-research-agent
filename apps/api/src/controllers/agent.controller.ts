@@ -3,6 +3,7 @@ import type { Context } from "hono";
 import {
     AGENT_DEBUG_STEPS,
 } from "../config";
+import { log } from "../lib/logger";
 import {
     getAgentCapabilities,
     isLlmConfigured,
@@ -30,7 +31,14 @@ function serializeRun(record: AgentRunRecord): AgentRunRecord | { id: string; st
     return { id: record.id, stepCount: record.steps.length };
 }
 
+function messagePreview(text: string, max = 160): string {
+    const t = text.trim();
+    if (t.length <= max) return t;
+    return `${t.slice(0, max - 3)}...`;
+}
+
 export function getAgentHandler(c: Context) {
+    log.info("agent.http.capabilities");
     return c.json({
         ...getAgentCapabilities(),
         llmConfigured: isLlmConfigured(),
@@ -42,10 +50,12 @@ export async function postAgentChatHandler(c: Context) {
     try {
         body = await c.req.json();
     } catch {
+        log.warn("agent.chat.bad_request", { reason: "invalid_json" });
         return c.json({ error: "Invalid JSON body" }, 400);
     }
 
     if (!body || typeof body !== "object") {
+        log.warn("agent.chat.bad_request", { reason: "not_object" });
         return c.json({ error: "Expected JSON object" }, 400);
     }
 
@@ -55,15 +65,27 @@ export async function postAgentChatHandler(c: Context) {
             : "";
 
     if (!message.trim()) {
+        log.warn("agent.chat.bad_request", { reason: "empty_message" });
         return c.json({ error: "message is required and must be non-empty" }, 400);
     }
 
     const history = parseHistory((body as { history?: unknown }).history);
 
+    log.info("agent.chat.incoming", {
+        messagePreview: messagePreview(message),
+        messageChars: message.length,
+        historyTurns: history?.length ?? 0,
+    });
+
     const result = await runResearchAgent({ message, history });
 
     if (result.error && result.reply === null) {
         const status = result.error.includes("GOOGLE_API_KEY") ? 503 : 500;
+        log.warn("agent.chat.response", {
+            runId: result.run.id,
+            status,
+            error: result.error,
+        });
         return c.json(
             {
                 error: result.error,
@@ -72,6 +94,13 @@ export async function postAgentChatHandler(c: Context) {
             status,
         );
     }
+
+    log.info("agent.chat.response", {
+        runId: result.run.id,
+        status: 200,
+        replyChars: result.reply?.length ?? 0,
+        stepCount: result.run.steps.length,
+    });
 
     return c.json({
         reply: result.reply,

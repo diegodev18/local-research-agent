@@ -5,6 +5,7 @@ import type { StepEvent } from "../session/types";
 import type { ToolContext } from "../tools/context";
 
 export type AgentLoopParams = {
+    runId: string;
     genAI: GoogleGenerativeAI;
     modelName: string;
     userMessage: string;
