@@ -109,9 +109,9 @@ export function ResearchChat() {
     <div className="flex min-h-dvh w-full flex-col items-center bg-background p-4">
       <Card className="flex h-[calc(100dvh-2rem)] w-full max-w-3xl min-h-0 flex-col">
         <CardHeader className="shrink-0 border-b">
-          <CardTitle>Agente local</CardTitle>
+          <CardTitle>Local Research Agent</CardTitle>
           <CardDescription>
-            Pregunta sobre archivos del workspace configurado en la API.
+            Pregunta sobre el workspace que usa la API (carpeta local o repositorio clonado).
           </CardDescription>
         </CardHeader>
         <CardContent className="flex min-h-0 flex-1 flex-col gap-3 px-0 pt-4">

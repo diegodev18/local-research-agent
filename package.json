@@ -1,5 +1,5 @@
 {
-  "name": "info-local-agent",
+  "name": "local-research-agent",
   "workspaces": [
     "apps/*"
   ],

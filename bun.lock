@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "info-local-agent",
+      "name": "local-research-agent",
     },
     "apps/api": {
       "name": "api",
