@@ -2,6 +2,8 @@ import { Hono } from "hono";
 
 import { cors } from "hono/cors";
 
+import agentRoutes from "./routes/agent.route";
+
 const app = new Hono();
 
 app.use("*", cors({
@@ -11,6 +13,8 @@ app.use("*", cors({
     credentials: true,
 }));
 
-app.get("/", (c) => c.text("Hello World"));
+app.get("/api/health", (c) => c.text("Hello World"));
+app.route("/api/agent", agentRoutes);
+
 
 export default app;
