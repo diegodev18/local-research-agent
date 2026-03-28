@@ -1,12 +1,12 @@
 {
   "name": "info-local-agent",
-  "module": "index.ts",
-  "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
   "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
+  "scripts": {
+    "build": "bun run --filter web --filter api build",
+    "dev": "bun run --filter web --filter api dev",
+    "start": "bun run --filter web --filter api start"
   }
 }
