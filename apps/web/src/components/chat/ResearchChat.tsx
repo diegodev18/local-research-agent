@@ -180,10 +180,9 @@ export function ResearchChat() {
                   value={draft}
                   onChange={(ev) => setDraft(ev.target.value)}
                   placeholder="P. ej.: ¿Qué hace el agente en apps/api?"
-                  rows={3}
                   disabled={loading}
                   aria-invalid={Boolean(error)}
-                  className="resize-none"
+                  className="max-h-[120px] overflow-y-auto resize-none"
                   onKeyDown={(ev) => {
                     if (ev.key === "Enter" && !ev.shiftKey) {
                       ev.preventDefault()
