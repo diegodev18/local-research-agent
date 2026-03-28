@@ -42,6 +42,13 @@ export function ResearchChat() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (!loading) {
+      inputRef.current?.focus()
+    }
+  }, [loading])
 
   useEffect(() => {
     if (messages.length > 0 && viewportRef.current) {
@@ -168,6 +175,7 @@ export function ResearchChat() {
                 <FieldLabel htmlFor="chat-message">Mensaje</FieldLabel>
                 <Textarea
                   id="chat-message"
+                  ref={inputRef}
                   name="message"
                   value={draft}
                   onChange={(ev) => setDraft(ev.target.value)}
