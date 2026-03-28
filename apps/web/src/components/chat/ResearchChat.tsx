@@ -105,8 +105,8 @@ export function ResearchChat() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col gap-4 bg-background p-4">
-      <Card className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-dvh w-full flex-col items-center bg-background p-4">
+      <Card className="flex h-[calc(100dvh-2rem)] w-full max-w-3xl min-h-0 flex-col">
         <CardHeader className="shrink-0 border-b">
           <CardTitle>Agente local</CardTitle>
           <CardDescription>
