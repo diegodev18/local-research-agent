@@ -1,0 +1,42 @@
+# Uso: copia docker/.env.example a .env en la raíz (o exporta variables) y ejecuta:
+#   docker compose up --build
+#
+# Variables necesarias:
+#   GOOGLE_API_KEY  — clave de Gemini
+#   REPO_URL        — URL HTTPS de un repo Git público (ej. https://github.com/org/repo.git)
+#
+# Opcionales:
+#   REPO_REF              — rama o tag (clone --branch)
+#   FORCE_REPO_REFRESH    — true para borrar /workspace y volver a clonar
+#   MAIN_AGENT_MODEL, AGENT_*, etc. — ver apps/api/.env.example
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    environment:
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      REPO_URL: ${REPO_URL}
+      REPO_REF: ${REPO_REF:-}
+      FORCE_REPO_REFRESH: ${FORCE_REPO_REFRESH:-false}
+      AGENT_WORKSPACE_ROOT: /workspace
+      PORT: "3000"
+    volumes:
+      - agent_workspace:/workspace
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+      args:
+        VITE_API_BASE_URL: ""
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  agent_workspace:

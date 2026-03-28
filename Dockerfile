@@ -1,0 +1,43 @@
+# --- API (Bun + Git clone en entrypoint) ---
+FROM oven/bun:1 AS api
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY apps/api/package.json apps/api/bun.lock ./
+RUN bun install --frozen-lockfile
+
+COPY apps/api/ ./
+COPY docker/entrypoint-api.sh /entrypoint-api.sh
+RUN chmod +x /entrypoint-api.sh
+
+ENV AGENT_WORKSPACE_ROOT=/workspace
+EXPOSE 3000
+
+ENTRYPOINT ["/entrypoint-api.sh"]
+CMD ["bun", "run", "index.ts"]
+
+# --- Web: build estático ---
+FROM oven/bun:1 AS web-builder
+
+ARG VITE_API_BASE_URL=
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
+WORKDIR /web
+
+COPY apps/web/package.json apps/web/bun.lock ./
+RUN bun install --frozen-lockfile
+
+COPY apps/web/ ./
+RUN bun run build
+
+# --- Web: Nginx + SPA ---
+FROM nginx:alpine AS web
+
+COPY --from=web-builder /web/dist /usr/share/nginx/html
+COPY docker/nginx-web.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
