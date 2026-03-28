@@ -41,11 +41,14 @@ export function ResearchChat() {
   const [draft, setDraft] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const viewportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (messages.length > 0) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (messages.length > 0 && viewportRef.current) {
+      viewportRef.current.scrollTo({
+        top: viewportRef.current.scrollHeight,
+        behavior: "smooth",
+      })
     }
   }, [messages, loading])
 
@@ -126,7 +129,7 @@ export function ResearchChat() {
               </Alert>
             </div>
           ) : null}
-          <ScrollArea className="min-h-0 flex-1 px-4">
+          <ScrollArea viewportRef={viewportRef} className="min-h-0 flex-1 px-4">
             <div className="flex flex-col gap-3 pb-4">
               {messages.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
@@ -155,7 +158,6 @@ export function ResearchChat() {
                   Pensando…
                 </div>
               ) : null}
-              <div ref={bottomRef} />
             </div>
           </ScrollArea>
         </CardContent>
